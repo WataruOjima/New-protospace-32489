@@ -1,7 +1,7 @@
 class PrototypesController < ApplicationController
   before_action :authenticate_user!, only: [:create, :edit, :update, :new, :update, :destroy]
   before_action :move_to_index, except: [:index, :show]
-  before_action :authenticate_user!, except: [:edit, :update, :destroy]
+  before_action :contributor_confirmation, only: [:edit, :update, :destroy]
   
   def index
     @prototypes = Prototype.all
@@ -24,12 +24,13 @@ class PrototypesController < ApplicationController
     @prototype = Prototype.find(params[:id])
     @comment = Comment.new
     @comments = @prototype.comments.includes(:user)
-    
   end
 
   def edit
     @prototype = Prototype.find(params[:id])
-    redirect_to root_path unless user_signed_in?
+    unless user_signed_in?
+      redirect_to root_path 
+    end
   end
 
   def update
@@ -48,18 +49,21 @@ class PrototypesController < ApplicationController
   end
 
   private
-    def prototype_params
-      params.require(:prototype).permit(:title, :catch_copy, :concept, :image).merge(user_id: current_user.id)
-    end
-  
-    def move_to_index
-      unless user_signed_in?
-        redirect_to action: :index
-      end
-    end
 
-    def contributor_confirmation
-      redirect_to root_path unless current_user == @prototype.user
-    end
+  def prototype_params
+    params.require(:prototype).permit(:title, :catch_copy, :concept, :image).merge(user_id: current_user.id)
+  end
 
+  def move_to_index
+    unless user_signed_in?
+      redirect_to action: :index
+    end
+  end
+
+  def contributor_confirmation
+    @prototype = Prototype.find(params[:id])
+    unless current_user.id == @prototype.user.id
+      redirect_to action: :index
+    end
+  end
 end
