@@ -29,7 +29,7 @@ class PrototypesController < ApplicationController
   def edit
     @prototype = Prototype.find(params[:id])
     unless user_signed_in?
-      redirect_to root_path 
+      redirect_to root_path
     end
   end
 
@@ -63,7 +63,7 @@ class PrototypesController < ApplicationController
   def contributor_confirmation
     @prototype = Prototype.find(params[:id])
     unless current_user.id == @prototype.user.id
-      redirect_to action: :index
+      redirect_to root_path
     end
   end
 end
